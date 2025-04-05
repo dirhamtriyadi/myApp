@@ -141,7 +141,7 @@ export default function App() {
               style={styles.retakeButton}
               onPress={() => {
                 setPhotoUri(null); // keluar dari preview
-                setDatetime(""); // reset datetime
+                setDatetime(''); // reset datetime
                 setLocation(null); // reset lokasi
                 setAddress(null); // reset alamat
               }}
@@ -152,7 +152,7 @@ export default function App() {
               style={styles.saveButton}
               onPress={saveImageWithOverlay}
             >
-              <Text style={{ color: "white" }}>💾 Simpan Foto</Text>
+              <Text style={{ color: 'white' }}>💾 Simpan Foto</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -163,22 +163,40 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
-        <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
+        <CameraView
+          style={styles.camera}
+          facing={facing}
+          mirror
+          ref={cameraRef}
+        >
           <View style={styles.infoContainer}>
             <Text style={styles.infoText}>Arah Kamera: {facing}</Text>
           </View>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button} onPress={takePicture}>
-              <IconSymbol size={28} name='camera.fill' color='white' />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={toggleCameraFacing}
-            >
-              <IconSymbol size={28} name='camera.rotate' color='white' />
-            </TouchableOpacity>
-          </View>
         </CameraView>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={takePicture}>
+            <IconSymbol size={28} name='camera.fill' color='white' />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.button,
+              {
+                padding: 16,
+                borderRadius: 50,
+                borderColor: 'white',
+                borderWidth: 2,
+                backgroundColor: 'black',
+                transform: [{ translateY: -20 }],
+              },
+            ]}
+            onPress={takePicture}
+          >
+            <IconSymbol size={28} name='camera.fill' color='white' />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+            <IconSymbol size={28} name='camera.rotate' color='white' />
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -211,19 +229,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   buttonContainer: {
-    position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 100 : 20,
-    left: 20,
-    right: 20,
+    marginBottom: Platform.OS === 'ios' ? 80 : 0,
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 20,
+    justifyContent: 'space-evenly',
+    backgroundColor: 'rgfba(0, 0, 0, 0.5)',
+    alignItems: 'center',
   },
   button: {
     padding: 10,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    borderRadius: 8,
-    alignItems: 'center',
   },
   previewContainer: {
     flex: 1,
@@ -235,12 +249,12 @@ const styles = StyleSheet.create({
   },
   overlay: {
     position: 'absolute',
-    bottom: 80,
-    left: 10,
-    right: 10,
+    bottom: 8,
+    left: 8,
+    right: 8,
     backgroundColor: 'rgba(0,0,0,0.6)',
-    padding: 10,
-    borderRadius: 10,
+    padding: 12,
+    borderRadius: 12,
   },
   overlayText: {
     color: 'white',
@@ -256,22 +270,22 @@ const styles = StyleSheet.create({
     // bottom: Platform.OS === "ios" ? 90 : 20,
   },
   actionButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginHorizontal: 16,
-    // marginBottom: Platform.OS === "ios" ? 90 : 20,
+    marginBottom: Platform.OS === 'ios' ? 90 : 20,
     // gap: 10,
   },
   retakeButton: {
-    backgroundColor: "#9E9E9E",
+    backgroundColor: '#9E9E9E',
     padding: 12,
-    alignItems: "center",
+    alignItems: 'center',
     borderRadius: 8,
     margin: 16,
     // bottom: Platform.OS === "ios" ? 90 : 20,
   },
   retakeText: {
-    color: "white",
-    fontWeight: "bold",
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
