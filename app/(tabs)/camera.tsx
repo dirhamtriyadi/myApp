@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Button,
+  Image,
   Platform,
   StyleSheet,
   Text,
@@ -13,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { captureRef } from "react-native-view-shot";
 
 export default function App() {
   const [facing, setFacing] = useState<CameraType>("back");
@@ -22,20 +24,24 @@ export default function App() {
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [address, setAddress] = useState<any>(null);
   const [datetime, setDatetime] = useState<string>("");
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
   const cameraRef = useRef<any>(null);
+  const shotRef = useRef<any>(null);
 
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
         return;
       }
-
       const currentLocation = await Location.getCurrentPositionAsync({});
+      const geocode = await Location.reverseGeocodeAsync(
+        currentLocation.coords
+      );
       setLocation(currentLocation);
+      setAddress(geocode[0]);
     })();
 
     const interval = setInterval(() => {
@@ -44,12 +50,6 @@ export default function App() {
 
     return () => clearInterval(interval);
   }, []);
-
-  const displayText = errorMsg
-    ? errorMsg
-    : location
-    ? `Latitude: ${location.coords.latitude}\nLongitude: ${location.coords.longitude}\nDatetime: ${datetime}`
-    : "Waiting...";
 
   if (!permission || !mediaPermission) return <View style={styles.container} />;
 
@@ -86,9 +86,12 @@ export default function App() {
     if (cameraRef.current) {
       try {
         const photo = await cameraRef.current.takePictureAsync();
-        const asset = await MediaLibrary.createAssetAsync(photo.uri); // Save photo to gallery
-        Alert.alert("Picture Saved", `Photo saved to gallery at: ${asset.uri}`);
-        console.log("Photo URI:", photo.uri);
+        setPhotoUri(photo.uri);
+        const loc = await Location.getCurrentPositionAsync({});
+        const geocode = await Location.reverseGeocodeAsync(loc.coords);
+        setLocation(loc);
+        setAddress(geocode[0]);
+        setDatetime(new Date().toLocaleString());
       } catch (error) {
         console.error("Error taking picture:", error);
         Alert.alert("Error", "Failed to take picture.");
@@ -96,12 +99,58 @@ export default function App() {
     }
   };
 
+  const saveImageWithOverlay = async () => {
+    try {
+      await new Promise((r) => setTimeout(r, 100)); // wait a moment
+      const uri = await captureRef(shotRef, {
+        format: "jpg",
+        quality: 1,
+      });
+      await MediaLibrary.createAssetAsync(uri);
+      Alert.alert("Success", "Photo with overlay saved to gallery.");
+      setPhotoUri(null);
+    } catch (err) {
+      console.error("Failed to capture image:", err);
+    }
+  };
+
+  if (photoUri) {
+    return (
+      <SafeAreaProvider>
+        <SafeAreaView style={styles.container}>
+          <View
+            style={styles.previewContainer}
+            ref={shotRef}
+            collapsable={false}
+          >
+            <Image source={{ uri: photoUri }} style={styles.previewImage} />
+            <View style={styles.overlay}>
+              <Text style={styles.overlayText}>🕒 {datetime}</Text>
+              <Text style={styles.overlayText}>
+                📍 {location?.coords.latitude}, {location?.coords.longitude}
+              </Text>
+              <Text style={styles.overlayText}>
+                🏠 {address?.street}, {address?.city}, {address?.region}
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={styles.saveButton}
+            onPress={saveImageWithOverlay}
+          >
+            <Text style={{ color: "white" }}>💾 Simpan Foto</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
+      </SafeAreaProvider>
+    );
+  }
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
         <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
           <View style={styles.infoContainer}>
-            <Text style={styles.infoText}>{displayText}</Text>
+            <Text style={styles.infoText}>Arah Kamera: {facing}</Text>
           </View>
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.button} onPress={takePicture}>
@@ -123,7 +172,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
     backgroundColor: "black",
   },
   message: {
@@ -149,7 +197,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     position: "absolute",
-    bottom: Platform.OS === "ios" ? 40 : 20, // Add extra padding for iOS
+    bottom: Platform.OS === "ios" ? 100 : 20,
     left: 20,
     right: 20,
     flexDirection: "row",
@@ -161,5 +209,35 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.7)",
     borderRadius: 8,
     alignItems: "center",
+  },
+  previewContainer: {
+    flex: 1,
+    position: "relative",
+  },
+  previewImage: {
+    flex: 1,
+    resizeMode: "cover",
+  },
+  overlay: {
+    position: "absolute",
+    bottom: 80,
+    left: 10,
+    right: 10,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    padding: 10,
+    borderRadius: 10,
+  },
+  overlayText: {
+    color: "white",
+    fontSize: 14,
+    marginBottom: 5,
+  },
+  saveButton: {
+    backgroundColor: "#1E88E5",
+    padding: 12,
+    alignItems: "center",
+    borderRadius: 8,
+    margin: 16,
+    bottom: Platform.OS === "ios" ? 90 : 20,
   },
 });
