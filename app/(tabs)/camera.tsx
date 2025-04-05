@@ -1,8 +1,8 @@
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
-import * as Location from "expo-location";
-import * as MediaLibrary from "expo-media-library";
-import { useEffect, useRef, useState } from "react";
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
+import * as Location from 'expo-location';
+import * as MediaLibrary from 'expo-media-library';
+import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Button,
@@ -12,12 +12,12 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { captureRef } from "react-native-view-shot";
+} from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { captureRef } from 'react-native-view-shot';
 
 export default function App() {
-  const [facing, setFacing] = useState<CameraType>("back");
+  const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
   const [mediaPermission, requestMediaPermission] =
     MediaLibrary.usePermissions();
@@ -25,15 +25,17 @@ export default function App() {
     null
   );
   const [address, setAddress] = useState<any>(null);
-  const [datetime, setDatetime] = useState<string>("");
+  const [datetime, setDatetime] = useState<string>('');
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const cameraRef = useRef<any>(null);
   const shotRef = useRef<any>(null);
 
   useEffect(() => {
+    if (photoUri) return;
+
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
+      if (status !== 'granted') {
         return;
       }
       const currentLocation = await Location.getCurrentPositionAsync({});
@@ -49,7 +51,7 @@ export default function App() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [photoUri]);
 
   if (!permission || !mediaPermission) return <View style={styles.container} />;
 
@@ -59,7 +61,7 @@ export default function App() {
         <Text style={styles.message}>
           We need your permission to show the camera
         </Text>
-        <Button onPress={requestPermission} title="Grant Camera Permission" />
+        <Button onPress={requestPermission} title='Grant Camera Permission' />
       </View>
     );
   }
@@ -72,14 +74,14 @@ export default function App() {
         </Text>
         <Button
           onPress={requestMediaPermission}
-          title="Grant Media Permission"
+          title='Grant Media Permission'
         />
       </View>
     );
   }
 
   const toggleCameraFacing = () => {
-    setFacing((prev) => (prev === "back" ? "front" : "back"));
+    setFacing((prev) => (prev === 'back' ? 'front' : 'back'));
   };
 
   const takePicture = async () => {
@@ -93,8 +95,8 @@ export default function App() {
         setAddress(geocode[0]);
         setDatetime(new Date().toLocaleString());
       } catch (error) {
-        console.error("Error taking picture:", error);
-        Alert.alert("Error", "Failed to take picture.");
+        console.error('Error taking picture:', error);
+        Alert.alert('Error', 'Failed to take picture.');
       }
     }
   };
@@ -103,14 +105,14 @@ export default function App() {
     try {
       await new Promise((r) => setTimeout(r, 100)); // wait a moment
       const uri = await captureRef(shotRef, {
-        format: "jpg",
+        format: 'jpg',
         quality: 1,
       });
       await MediaLibrary.createAssetAsync(uri);
-      Alert.alert("Success", "Photo with overlay saved to gallery.");
+      Alert.alert('Success', 'Photo with overlay saved to gallery.');
       setPhotoUri(null);
     } catch (err) {
-      console.error("Failed to capture image:", err);
+      console.error('Failed to capture image:', err);
     }
   };
 
@@ -167,13 +169,13 @@ export default function App() {
           </View>
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.button} onPress={takePicture}>
-              <IconSymbol size={28} name="camera.fill" color="white" />
+              <IconSymbol size={28} name='camera.fill' color='white' />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.button}
               onPress={toggleCameraFacing}
             >
-              <IconSymbol size={28} name="camera.rotate" color="white" />
+              <IconSymbol size={28} name='camera.rotate' color='white' />
             </TouchableOpacity>
           </View>
         </CameraView>
@@ -185,70 +187,70 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "black",
+    backgroundColor: 'black',
   },
   message: {
-    textAlign: "center",
+    textAlign: 'center',
     paddingBottom: 10,
-    color: "white",
+    color: 'white',
   },
   camera: {
     flex: 1,
   },
   infoContainer: {
-    position: "absolute",
+    position: 'absolute',
     top: 10,
     left: 10,
     right: 10,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     padding: 10,
     borderRadius: 8,
   },
   infoText: {
-    color: "white",
+    color: 'white',
     fontSize: 16,
   },
   buttonContainer: {
-    position: "absolute",
-    bottom: Platform.OS === "ios" ? 100 : 20,
+    position: 'absolute',
+    bottom: Platform.OS === 'ios' ? 100 : 20,
     left: 20,
     right: 20,
-    flexDirection: "row",
-    justifyContent: "center",
+    flexDirection: 'row',
+    justifyContent: 'center',
     gap: 20,
   },
   button: {
     padding: 10,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     borderRadius: 8,
-    alignItems: "center",
+    alignItems: 'center',
   },
   previewContainer: {
     flex: 1,
-    position: "relative",
+    position: 'relative',
   },
   previewImage: {
     flex: 1,
-    resizeMode: "cover",
+    resizeMode: 'cover',
   },
   overlay: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 80,
     left: 10,
     right: 10,
-    backgroundColor: "rgba(0,0,0,0.6)",
+    backgroundColor: 'rgba(0,0,0,0.6)',
     padding: 10,
     borderRadius: 10,
   },
   overlayText: {
-    color: "white",
+    color: 'white',
     fontSize: 14,
     marginBottom: 5,
   },
   saveButton: {
-    backgroundColor: "#1E88E5",
+    backgroundColor: '#1E88E5',
     padding: 12,
-    alignItems: "center",
+    alignItems: 'center',
     borderRadius: 8,
     margin: 16,
     // bottom: Platform.OS === "ios" ? 90 : 20,
