@@ -134,12 +134,25 @@ export default function App() {
               </Text>
             </View>
           </View>
-          <TouchableOpacity
-            style={styles.saveButton}
-            onPress={saveImageWithOverlay}
-          >
-            <Text style={{ color: "white" }}>💾 Simpan Foto</Text>
-          </TouchableOpacity>
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={styles.retakeButton}
+              onPress={() => {
+                setPhotoUri(null); // keluar dari preview
+                setDatetime(""); // reset datetime
+                setLocation(null); // reset lokasi
+                setAddress(null); // reset alamat
+              }}
+            >
+              <Text style={styles.retakeText}>🔁 Ambil Ulang</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={saveImageWithOverlay}
+            >
+              <Text style={{ color: "white" }}>💾 Simpan Foto</Text>
+            </TouchableOpacity>
+          </View>
         </SafeAreaView>
       </SafeAreaProvider>
     );
@@ -238,6 +251,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 8,
     margin: 16,
-    bottom: Platform.OS === "ios" ? 90 : 20,
+    // bottom: Platform.OS === "ios" ? 90 : 20,
+  },
+  actionButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginHorizontal: 16,
+    // marginBottom: Platform.OS === "ios" ? 90 : 20,
+    // gap: 10,
+  },
+  retakeButton: {
+    backgroundColor: "#9E9E9E",
+    padding: 12,
+    alignItems: "center",
+    borderRadius: 8,
+    margin: 16,
+    // bottom: Platform.OS === "ios" ? 90 : 20,
+  },
+  retakeText: {
+    color: "white",
+    fontWeight: "bold",
   },
 });
